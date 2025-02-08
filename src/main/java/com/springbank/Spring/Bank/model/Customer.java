@@ -15,11 +15,15 @@ public class Customer {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)  // Ensure phone is required
+    @Column(nullable = false)
     private String phone;
 
     @Column(nullable = false)
     private double balance;
+
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    private Account account;
+
     public String getPhone() {
         return phone;
     }
@@ -59,5 +63,13 @@ public class Customer {
 
     public void setBalance(double balance) {
         this.balance = balance;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
 }

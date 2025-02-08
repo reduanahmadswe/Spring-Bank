@@ -1,6 +1,7 @@
 package com.springbank.Spring.Bank.service;
 
 
+import com.springbank.Spring.Bank.model.Account;
 import com.springbank.Spring.Bank.model.Customer;
 import com.springbank.Spring.Bank.model.Transaction;
 import com.springbank.Spring.Bank.repository.CustomerRepository;
@@ -24,13 +25,16 @@ public class TransactionService {
     @Transactional
     public String deposit(Long customerId, double amount) {
         Optional<Customer> customerOpt = customerRepository.findById(customerId);
+        //Optional<Account> accountOpt = accountRepository.findByCustomer_Id(customerId);
+
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
             customer.setBalance(customer.getBalance() + amount);
             customerRepository.save(customer);
 
             // Save transaction log
-            transactionRepository.save(new Transaction("Deposit", amount, customer));
+           //transactionRepository.save(new Transaction("Deposit", amount, customer));
+            transactionRepository.save(new Transaction("Deposit", amount, customer.getAccount()));
 
             return "Deposit successful. New balance: " + customer.getBalance();
         }
@@ -47,7 +51,7 @@ public class TransactionService {
                 customerRepository.save(customer);
 
                 // Save transaction log
-                transactionRepository.save(new Transaction("Withdraw", amount, customer));
+                transactionRepository.save(new Transaction("Withdraw", amount, customer.getAccount()));
 
                 return "Withdrawal successful. New balance: " + customer.getBalance();
             } else {
@@ -74,8 +78,11 @@ public class TransactionService {
                 customerRepository.save(toCustomer);
 
                 // Save transaction log
-                transactionRepository.save(new Transaction("Transfer", amount, fromCustomer));
-                transactionRepository.save(new Transaction("Receive", amount, toCustomer));
+//                transactionRepository.save(new Transaction("Transfer", amount, fromCustomer));
+//                transactionRepository.save(new Transaction("Receive", amount, toCustomer));
+                transactionRepository.save(new Transaction("Transfer", amount, fromCustomer.getAccount()));
+                transactionRepository.save(new Transaction("Receive", amount, toCustomer.getAccount()));
+
 
                 return "Transfer successful!";
             } else {
@@ -86,7 +93,8 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionHistory(Long customerId) {
-        return transactionRepository.findByCustomer_Id(customerId);
+        //return transactionRepository.findByCustomer_Id(customerId);
+        return transactionRepository.findByCustomerId(customerId);
     }
 }
 

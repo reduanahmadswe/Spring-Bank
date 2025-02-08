@@ -19,16 +19,30 @@ public class Transaction {
     @JoinColumn(name = "account_id")
     private Customer customer;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id", insertable = false, updatable = false)  // This ensures the column is not duplicated
+    private Account account;
+
+
     // Constructors
     public Transaction() {
         this.timestamp = LocalDateTime.now();
     }
 
-    public Transaction(String type, Double amount, Customer customer) {
+    public Transaction(String type, Double amount, Account account) {
         this.type = type;
         this.amount = amount;
-        this.customer = customer;
+        //this.customer = customer;
+        this.account = account;
         this.timestamp = LocalDateTime.now();
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public Long getId() {
@@ -63,12 +77,12 @@ public class Transaction {
         this.timestamp = timestamp;
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
+//    public Customer getCustomer() {
+//        return customer;
+//    }
+//
+//    public void setCustomer(Customer customer) {
+//        this.customer = customer;
+//    }
 
 }
