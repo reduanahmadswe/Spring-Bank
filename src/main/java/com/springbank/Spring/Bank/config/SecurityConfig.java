@@ -23,8 +23,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/transaction/deposit").permitAll()//authenticated() // অথেন্টিকেশন লাগবে
                         .requestMatchers("/api/transaction/withdraw").permitAll()//authenticated()
-                        .requestMatchers("/api/transaction/transfer").authenticated()
-                        .requestMatchers("/api/transaction/history/**").authenticated()
+                        .requestMatchers("/api/transaction/transfer").permitAll()//authenticated()
+                        .requestMatchers("/api/transaction/history/**").permitAll()//authenticated()
 
                         .requestMatchers("/api/admin/**").authenticated()
                 )
