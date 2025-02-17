@@ -5,6 +5,8 @@ import com.springbank.Spring.Bank.service.CustomerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -15,19 +17,23 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    // Customer Account Creation
+    // Create a Customer Account
     @PostMapping("/create")
     public ResponseEntity<String> createCustomer(@RequestBody Customer customer) {
-        customerService.saveCustomer(customer); // নতুন গ্রাহক তৈরি
-        return ResponseEntity.ok("Customer Account Created Successfully!");
+        try {
+            customerService.saveCustomer(customer);
+            return ResponseEntity.ok("Customer Account Created Successfully!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // Balance Check
+    // Check Balance
     @GetMapping("/balance/{id}")
-    public ResponseEntity<String> checkBalance(@PathVariable Long id) {
-        Customer customer = customerService.getCustomerById(id);
-        if (customer != null) {
-            return ResponseEntity.ok("{\"balance\": " + customer.getBalance() + "}");
+    public ResponseEntity<?> checkBalance(@PathVariable Long id) {
+        Optional<Customer> customer = customerService.getCustomerById(id);
+        if (customer.isPresent()) {
+            return ResponseEntity.ok("{\"balance\": " + customer.get().getBalance() + "}");
         }
         return ResponseEntity.status(404).body("Customer Not Found!");
     }

@@ -1,5 +1,6 @@
 package com.springbank.Spring.Bank.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,9 +20,10 @@ public class Customer {
     private String phone;
 
     @Column(nullable = false)
-    private double balance;
+    private double balance = 0.0; // Default balance
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Account account;
 
     public String getPhone() {
@@ -32,7 +34,6 @@ public class Customer {
         this.phone = phone;
     }
 
-    // Getter & Setter methods
     public Long getId() {
         return id;
     }

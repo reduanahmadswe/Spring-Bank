@@ -5,6 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-   List<Transaction> findByCustomer_Id(Long customerId);
-   List<Transaction> findByCustomerId(Long customerId); // Customer ID দিয়ে খোঁজা
+   List<Transaction> findByAccount_Id(Long accountId);
 }

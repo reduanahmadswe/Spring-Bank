@@ -5,35 +5,45 @@ import com.springbank.Spring.Bank.model.Customer;
 import com.springbank.Spring.Bank.repository.AccountRepository;
 import com.springbank.Spring.Bank.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private AccountRepository accountRepository;
-
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
+        this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void saveCustomer(Customer customer) {
-        customerRepository.save(customer);  // Save customer
+        if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists!");
+        }
 
-        // Create new Account
+        customer.setBalance(0.0); // Initialize balance
+
+        customerRepository.save(customer); // Save customer first
+
+        // Create a new Account
         Account account = new Account();
         account.setCustomer(customer);
-        account.setAccountNumber(UUID.randomUUID().toString()); // Set unique account number
+        account.setAccountNumber(UUID.randomUUID().toString()); // Generate unique account number
         account.setBalance(0.0);
 
-        accountRepository.save(account);  // Save account
+        accountRepository.save(account); // Save account
     }
 
-    public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id).orElse(null);  // Find customer by ID
+    public Optional<Customer> getCustomerById(Long id) {
+        return customerRepository.findById(id);  // Find customer by ID
     }
 }

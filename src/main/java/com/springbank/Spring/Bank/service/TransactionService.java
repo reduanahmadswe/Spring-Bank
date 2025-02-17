@@ -4,6 +4,7 @@ package com.springbank.Spring.Bank.service;
 import com.springbank.Spring.Bank.model.Account;
 import com.springbank.Spring.Bank.model.Customer;
 import com.springbank.Spring.Bank.model.Transaction;
+import com.springbank.Spring.Bank.repository.AccountRepository;
 import com.springbank.Spring.Bank.repository.CustomerRepository;
 import com.springbank.Spring.Bank.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,40 +21,67 @@ public class TransactionService {
     private CustomerRepository customerRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private TransactionRepository transactionRepository;
 
     @Transactional
     public String deposit(Long customerId, double amount) {
         Optional<Customer> customerOpt = customerRepository.findById(customerId);
-        //Optional<Account> accountOpt = accountRepository.findByCustomer_Id(customerId);
 
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
+            Account account = customer.getAccount();
+
+            // Old Balance Log
+            System.out.println("Old Balance: " + account.getBalance());
+
+            // Update balance
+            account.setBalance(account.getBalance() + amount);
+            accountRepository.save(account);
+
             customer.setBalance(customer.getBalance() + amount);
-            customerRepository.save(customer);
+            customerRepository.save(customer);  // Customer টেবিলের ব্যালান্স আপডেট
 
-            // Save transaction log
-           //transactionRepository.save(new Transaction("Deposit", amount, customer));
-            transactionRepository.save(new Transaction("Deposit", amount, customer.getAccount()));
+            accountRepository.flush(); // Ensure the transaction is committed
 
-            return "Deposit successful. New balance: " + customer.getBalance();
+            // New Balance Log
+            System.out.println("New Balance: " + account.getBalance());
+
+            // Save transaction record
+            Transaction transaction = new Transaction("Deposit", amount, account);
+            transactionRepository.save(transaction);
+
+            return "Deposit successful. New balance: " + account.getBalance();
         }
+
         return "Customer not found!";
     }
+
+
+
 
     @Transactional
     public String withdraw(Long customerId, double amount) {
         Optional<Customer> customerOpt = customerRepository.findById(customerId);
+
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            if (customer.getBalance() >= amount) {
+            Account account = customer.getAccount();  // গ্রাহকের অ্যাকাউন্ট পাওয়া
+
+            if (account.getBalance() >= amount) {
+                // ব্যালান্স আপডেট
+                account.setBalance(account.getBalance() - amount);
                 customer.setBalance(customer.getBalance() - amount);
                 customerRepository.save(customer);
+                accountRepository.save(account);  // অ্যাকাউন্ট আপডেট
 
-                // Save transaction log
-                transactionRepository.save(new Transaction("Withdraw", amount, customer.getAccount()));
+                // ট্রানজেকশন সেভ
+                Transaction transaction = new Transaction("Withdraw", amount, account);
+                transactionRepository.save(transaction);
 
-                return "Withdrawal successful. New balance: " + customer.getBalance();
+                return "Withdrawal successful. New balance: " + account.getBalance();
             } else {
                 return "Insufficient funds!";
             }
@@ -70,19 +98,23 @@ public class TransactionService {
             Customer fromCustomer = fromCustomerOpt.get();
             Customer toCustomer = toCustomerOpt.get();
 
-            if (fromCustomer.getBalance() >= amount) {
-                fromCustomer.setBalance(fromCustomer.getBalance() - amount);
-                toCustomer.setBalance(toCustomer.getBalance() + amount);
+            Account fromAccount = fromCustomer.getAccount();
+            Account toAccount = toCustomer.getAccount();
 
-                customerRepository.save(fromCustomer);
-                customerRepository.save(toCustomer);
+            if (fromAccount.getBalance() >= amount) {
+                // ব্যালান্স আপডেট
+                fromAccount.setBalance(fromAccount.getBalance() - amount);
+                toAccount.setBalance(toAccount.getBalance() + amount);
 
-                // Save transaction log
-//                transactionRepository.save(new Transaction("Transfer", amount, fromCustomer));
-//                transactionRepository.save(new Transaction("Receive", amount, toCustomer));
-                transactionRepository.save(new Transaction("Transfer", amount, fromCustomer.getAccount()));
-                transactionRepository.save(new Transaction("Receive", amount, toCustomer.getAccount()));
+                accountRepository.save(fromAccount);
+                accountRepository.save(toAccount);
 
+                // ট্রানজেকশন সেভ
+                Transaction transaction1 = new Transaction("Transfer", amount, fromAccount);
+                transactionRepository.save(transaction1);
+
+                Transaction transaction2 = new Transaction("Receive", amount, toAccount);
+                transactionRepository.save(transaction2);
 
                 return "Transfer successful!";
             } else {
@@ -93,8 +125,14 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionHistory(Long customerId) {
-        //return transactionRepository.findByCustomer_Id(customerId);
-        return transactionRepository.findByCustomerId(customerId);
+        Optional<Customer> customerOpt = customerRepository.findById(customerId);
+
+        if (customerOpt.isPresent()) {
+            Customer customer = customerOpt.get();
+            return transactionRepository.findByAccount_Id(customer.getAccount().getId());  // অ্যাকাউন্ট আইডি দিয়ে লেনদেন খোঁজা
+        }
+        return null;
     }
 }
+
 

@@ -1,5 +1,6 @@
 package com.springbank.Spring.Bank.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.springbank.Spring.Bank.model.Customer;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -11,20 +12,16 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type; // Deposit, Withdraw, Transfer
+    private String type; // ডিপোজিট, উইথড্র, ট্রান্সফার
     private Double amount;
     private LocalDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Customer customer;
+    @JoinColumn(name = "account_id")  // অ্যাকাউন্টের সাথে সম্পর্ক
+    @JsonIgnoreProperties({"customer", "accountNumber", "balance"})
+    private Account account; // লেনদেন করা অ্যাকাউন্ট
 
-    @ManyToOne
-    @JoinColumn(name = "account_id", insertable = false, updatable = false)  // This ensures the column is not duplicated
-    private Account account;
-
-
-    // Constructors
+    // কনস্ট্রাক্টর
     public Transaction() {
         this.timestamp = LocalDateTime.now();
     }
@@ -32,19 +29,11 @@ public class Transaction {
     public Transaction(String type, Double amount, Account account) {
         this.type = type;
         this.amount = amount;
-        //this.customer = customer;
         this.account = account;
         this.timestamp = LocalDateTime.now();
     }
 
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
+    // গেটার এবং সেটার মেথড
     public Long getId() {
         return id;
     }
@@ -77,12 +66,12 @@ public class Transaction {
         this.timestamp = timestamp;
     }
 
-//    public Customer getCustomer() {
-//        return customer;
-//    }
-//
-//    public void setCustomer(Customer customer) {
-//        this.customer = customer;
-//    }
+    public Account getAccount() {
+        return account;
+    }
 
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }
+
