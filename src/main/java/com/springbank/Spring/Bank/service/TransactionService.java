@@ -1,6 +1,5 @@
 package com.springbank.Spring.Bank.service;
 
-
 import com.springbank.Spring.Bank.model.Account;
 import com.springbank.Spring.Bank.model.Customer;
 import com.springbank.Spring.Bank.model.Transaction;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +34,11 @@ public class TransactionService {
             Customer customer = customerOpt.get();
             Account account = customer.getAccount();
 
+            // ❌ Prevent deposit if the account is closed
+            if ("closed".equals(account.getStatus())) {
+                return "Transaction failed. This account is closed.";
+            }
+
             // Old Balance Log
             System.out.println("Old Balance: " + account.getBalance());
 
@@ -42,9 +47,9 @@ public class TransactionService {
             accountRepository.save(account);
 
             customer.setBalance(customer.getBalance() + amount);
-            customerRepository.save(customer);  // Customer টেবিলের ব্যালান্স আপডেট
+            customerRepository.save(customer);  // Update customer balance
 
-            accountRepository.flush(); // Ensure the transaction is committed
+            accountRepository.flush(); // Ensure transaction is committed
 
             // New Balance Log
             System.out.println("New Balance: " + account.getBalance());
@@ -59,25 +64,27 @@ public class TransactionService {
         return "Customer not found!";
     }
 
-
-
-
     @Transactional
     public String withdraw(Long customerId, double amount) {
         Optional<Customer> customerOpt = customerRepository.findById(customerId);
 
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            Account account = customer.getAccount();  // গ্রাহকের অ্যাকাউন্ট পাওয়া
+            Account account = customer.getAccount();
+
+            // ❌ Prevent withdrawal if the account is closed
+            if ("closed".equals(account.getStatus())) {
+                return "Transaction failed. This account is closed.";
+            }
 
             if (account.getBalance() >= amount) {
-                // ব্যালান্স আপডেট
+                // Update balance
                 account.setBalance(account.getBalance() - amount);
                 customer.setBalance(customer.getBalance() - amount);
                 customerRepository.save(customer);
-                accountRepository.save(account);  // অ্যাকাউন্ট আপডেট
+                accountRepository.save(account);
 
-                // ট্রানজেকশন সেভ
+                // Save transaction
                 Transaction transaction = new Transaction("Withdraw", amount, account);
                 transactionRepository.save(transaction);
 
@@ -101,15 +108,20 @@ public class TransactionService {
             Account fromAccount = fromCustomer.getAccount();
             Account toAccount = toCustomer.getAccount();
 
+            // ❌ Prevent transfer if either account is closed
+            if ("closed".equals(fromAccount.getStatus()) || "closed".equals(toAccount.getStatus())) {
+                return "Transaction failed. One or both accounts are closed.";
+            }
+
             if (fromAccount.getBalance() >= amount) {
-                // ব্যালান্স আপডেট
+                // Update balance
                 fromAccount.setBalance(fromAccount.getBalance() - amount);
                 toAccount.setBalance(toAccount.getBalance() + amount);
 
                 accountRepository.save(fromAccount);
                 accountRepository.save(toAccount);
 
-                // ট্রানজেকশন সেভ
+                // Save transactions
                 Transaction transaction1 = new Transaction("Transfer", amount, fromAccount);
                 transactionRepository.save(transaction1);
 
@@ -129,10 +141,8 @@ public class TransactionService {
 
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            return transactionRepository.findByAccount_Id(customer.getAccount().getId());  // অ্যাকাউন্ট আইডি দিয়ে লেনদেন খোঁজা
+            return transactionRepository.findByAccount_Id(customer.getAccount().getId());
         }
         return null;
     }
 }
-
-

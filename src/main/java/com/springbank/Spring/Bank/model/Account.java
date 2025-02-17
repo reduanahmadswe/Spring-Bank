@@ -3,6 +3,8 @@ package com.springbank.Spring.Bank.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "accounts")
 public class Account {
@@ -20,6 +22,25 @@ public class Account {
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @JsonIgnore
     private Customer customer;
+
+    private String status = "active";
+    private LocalDateTime closeAt;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCloseAt() {
+        return closeAt;
+    }
+
+    public void setCloseAt(LocalDateTime closeAt) {
+        this.closeAt = closeAt;
+    }
 
     public Long getId() {
         return id;

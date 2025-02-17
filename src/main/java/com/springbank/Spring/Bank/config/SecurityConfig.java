@@ -22,7 +22,9 @@ public class SecurityConfig {
                                 "/api/transaction/deposit",
                                 "/api/transaction/withdraw",
                                 "api/transaction/transfer",
-                                "api/transaction/history/**")
+                                "api/transaction/history/**",
+                                "/accounts/close/**",
+                                "accounts/reopen/**")
 
                         .permitAll()
                         .anyRequest().authenticated()

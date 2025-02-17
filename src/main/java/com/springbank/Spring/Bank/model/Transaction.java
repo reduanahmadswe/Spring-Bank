@@ -12,9 +12,12 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
+
     private String type; // ডিপোজিট, উইথড্র, ট্রান্সফার
     private Double amount;
     private LocalDateTime timestamp;
+    private String status = "completed";
 
     @ManyToOne
     @JoinColumn(name = "account_id")  // অ্যাকাউন্টের সাথে সম্পর্ক
@@ -31,6 +34,14 @@ public class Transaction {
         this.amount = amount;
         this.account = account;
         this.timestamp = LocalDateTime.now();
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     // গেটার এবং সেটার মেথড
