@@ -2,11 +2,12 @@ package com.springbank.Spring.Bank.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
 
 @Configuration
 public class SecurityConfig {
@@ -18,16 +19,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/register",
                                 "/api/admin/login",
                                 "/api/customer/create",
-                                "/api/customer/balance/**",
+                                "/api/customer/login",
                                 "/api/transaction/deposit",
                                 "/api/transaction/withdraw",
-                                "api/transaction/transfer",
-                                "api/transaction/history/**",
+                                "/api/transaction/transfer",
+                                "/api/transaction/history/**",
                                 "/accounts/close/**",
-                                "accounts/reopen/**")
-
-                        .permitAll()
-                        .anyRequest().authenticated()
+                                "/accounts/reopen/**")
+                        .permitAll() // Public routes
+                        .requestMatchers("/api/customer/balance/**",
+                                "/api/transaction/transfer",
+                                "/api/transaction/history/**")
+                        .authenticated() // Authenticated routes
+                        .anyRequest().authenticated() // All other requests need authentication
                 );
 
         return http.build();
@@ -37,5 +41,11 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // Using BCrypt for password encryption
     }
-}
 
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        return authenticationManagerBuilder.build();
+    }
+}

@@ -20,6 +20,17 @@ public class Customer {
     private String phone;
 
     @Column(nullable = false)
+    private String password;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Column(nullable = false)
     private double balance = 0.0; // Default balance
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
