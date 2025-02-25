@@ -21,6 +21,9 @@ public class CustomerService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
+    private AccountService accountService;  // Inject AccountService here
+
+    @Autowired
     public CustomerService(CustomerRepository customerRepository, AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
         this.accountRepository = accountRepository;
@@ -35,14 +38,14 @@ public class CustomerService {
         String encodedPassword = passwordEncoder.encode(customer.getPassword());
         customer.setPassword(encodedPassword);  // Set the encoded password
 
-        customer.setBalance(0.0); // Initialize balance
+        customer.setBalance(0.0);
 
-        customerRepository.save(customer); // Save customer first
+        customerRepository.save(customer);
 
         // Create a new Account
         Account account = new Account();
         account.setCustomer(customer);
-        account.setAccountNumber(UUID.randomUUID().toString()); // Generate unique account number
+        account.setAccountNumber(accountService.createUniqueAccountNumber()); // Use AccountService to generate unique account number
         account.setBalance(0.0);
 
         accountRepository.save(account); // Save account
@@ -59,6 +62,4 @@ public class CustomerService {
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);  // Compare password
     }
-
-
 }

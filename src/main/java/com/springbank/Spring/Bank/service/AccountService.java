@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class AccountService {
@@ -18,10 +19,26 @@ public class AccountService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    public String createUniqueAccountNumber() {
+        String accountNumber;
+        do {
+            accountNumber = generateAccountNumber(); // Call instance method normally
+        } while (accountRepository.existsByAccountNumber(accountNumber)); // Ensure uniqueness
+        return accountNumber;
+    }
+
+
+    private String generateAccountNumber() {
+        Random random = new Random();
+        long randomDigits = (long) (Math.pow(10, 9) + random.nextLong() % (Math.pow(10, 10) - Math.pow(10, 9)));
+        return "232" + randomDigits;
+    }
+
+
     public String closeAccount(Long accountId, Long customerId) {
         System.out.println("AccountId: " + accountId + ", CustomerId: " + customerId);
 
-        // Find account by ID and check ownership
+
         Account account = accountRepository.findById(accountId)
                 .filter(acc -> acc.getCustomer().getId().equals(customerId))
                 .orElse(null);
@@ -35,23 +52,23 @@ public class AccountService {
             return "This account is already closed.";
         }
 
-        // Ensure account balance is zero before closure
+
         if (account.getBalance() > 0) {
             return "Account balance must be zero to close the account.";
         }
 
-        // Ensure no pending transactions exist
+
         long pendingTransactions = transactionRepository.countByAccountAndStatus(account, "pending");
         if (pendingTransactions > 0) {
             return "Please complete all pending transactions before closing the account.";
         }
 
-        // Mark the account as closed
+
         account.setStatus("closed");
         account.setCloseAt(LocalDateTime.now());
         accountRepository.save(account);
 
-        // Log account closure as a transaction
+
         Transaction transaction = new Transaction();
         transaction.setAccount(account);
         transaction.setAmount(0.0);
@@ -87,7 +104,7 @@ public class AccountService {
 
             // অ্যাকাউন্ট পুনরায় চালু করা হচ্ছে
             account.setStatus("active");
-            account.setCloseAt(null); // বন্ধ করার সময় মুছে ফেলুন
+            account.setCloseAt(null);
             accountRepository.save(account);
 
             return "Account reopened successfully.";
