@@ -52,6 +52,7 @@ public class CustomerController {
     @PostMapping("/create")
     public ResponseEntity<String> createCustomer(@RequestBody Customer customer) {
         try {
+            System.out.println("Received customer: " + customer);
             customerService.saveCustomer(customer);
             return ResponseEntity.ok("Customer Account Created Successfully!");
         } catch (RuntimeException e) {

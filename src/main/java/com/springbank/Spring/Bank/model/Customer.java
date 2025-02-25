@@ -2,9 +2,7 @@ package com.springbank.Spring.Bank.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 
 @Entity
@@ -26,16 +24,13 @@ public class Customer {
     @Column(nullable = false)
     private String password;
 
-    /// perosnal information update
-
     @Column(nullable = false)
     private String fatherName;
 
     @Column(nullable = false)
     private String motherName;
 
-    @Column(nullable = false)
-    @JsonProperty("NID")
+    @Column(name = "nid", nullable = true)
     private String nid;
 
     @Column(nullable = false)
@@ -44,120 +39,73 @@ public class Customer {
     @Column(nullable = false)
     private String address;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dob;
 
 
     @Column(nullable = false)
     private double balance = 0.0; // Default balance
 
-    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
     @JsonIgnore
     private Account account;
 
-    public String getPhone() {
-        return phone;
-    }
+    @Column(nullable = false)
+    private String nomineeName;
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    @Column(nullable = false)
+    private String nationality;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(nullable = false)
+    private String nomineeAddress;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public double getBalance() {
-        return balance;
-    }
+    public String getFatherName() { return fatherName; }
+    public void setFatherName(String fatherName) { this.fatherName = fatherName; }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
+    public String getMotherName() { return motherName; }
+    public void setMotherName(String motherName) { this.motherName = motherName; }
 
-    public Account getAccount() {
-        return account;
-    }
+    public String getNid() { return nid; }
+    public void setNid(String nid) { this.nid = nid; }
 
-    public void setAccount(Account account) {
-        this.account = account;
-    }
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
-    public String getPassword() {
-        return password;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public LocalDate getDob() { return dob; }
+    public void setDob(LocalDate dob) { this.dob = dob; }
 
-    public String getFatherName() {
-        return fatherName;
-    }
+    public double getBalance() { return balance; }
+    public void setBalance(double balance) { this.balance = balance; }
 
-    public void setFatherName(String fatherName) {
-        this.fatherName = fatherName;
-    }
+    public Account getAccount() { return account; }
+    public void setAccount(Account account) { this.account = account; }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getNomineeName() { return nomineeName; }
+    public void setNomineeName(String nomineeName) { this.nomineeName = nomineeName; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public String getNationality() { return nationality; }
+    public void setNationality(String nationality) { this.nationality = nationality; }
 
-    public String getMotherName() {
-        return motherName;
-    }
-
-    public void setMotherName(String motherName) {
-        this.motherName = motherName;
-    }
-
-    public String getNid() {
-        return nid;
-    }
-
-    public void setNid(String nid) {
-        this.nid = nid;
-    }
-
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public LocalDate getDob() {
-        return dob;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
-    }
-
+    public String getNomineeAddress() { return nomineeAddress; }
+    public void setNomineeAddress(String nomineeAddress) { this.nomineeAddress = nomineeAddress; }
 }
