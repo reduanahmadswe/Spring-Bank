@@ -19,14 +19,14 @@ public class AccountService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    // **Generate Unique Account Number**
     public String createUniqueAccountNumber() {
         String accountNumber;
         do {
-            accountNumber = generateAccountNumber(); // Call instance method normally
-        } while (accountRepository.existsByAccountNumber(accountNumber)); // Ensure uniqueness
+            accountNumber = generateAccountNumber();
+        } while (accountRepository.existsByAccountNumber(accountNumber));
         return accountNumber;
     }
-
 
     private String generateAccountNumber() {
         Random random = new Random();
@@ -34,12 +34,9 @@ public class AccountService {
         return "232" + randomDigits;
     }
 
-
-    public String closeAccount(Long accountId, Long customerId) {
-        System.out.println("AccountId: " + accountId + ", CustomerId: " + customerId);
-
-
-        Account account = accountRepository.findById(accountId)
+    // **Close Account using Account Number**
+    public String closeAccount(String accountNumber, Long customerId) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
                 .filter(acc -> acc.getCustomer().getId().equals(customerId))
                 .orElse(null);
 
@@ -47,27 +44,22 @@ public class AccountService {
             return "Account not found or unauthorized access.";
         }
 
-        // If already closed, prevent further closure
-        if ("closed".equals(account.getStatus())) {
+        if ("closed".equalsIgnoreCase(account.getStatus())) {
             return "This account is already closed.";
         }
-
 
         if (account.getBalance() > 0) {
             return "Account balance must be zero to close the account.";
         }
-
 
         long pendingTransactions = transactionRepository.countByAccountAndStatus(account, "pending");
         if (pendingTransactions > 0) {
             return "Please complete all pending transactions before closing the account.";
         }
 
-
         account.setStatus("closed");
         account.setCloseAt(LocalDateTime.now());
         accountRepository.save(account);
-
 
         Transaction transaction = new Transaction();
         transaction.setAccount(account);
@@ -79,38 +71,37 @@ public class AccountService {
         return "Account closed successfully. No further transactions allowed.";
     }
 
-    public String reopenAccount(Long accountId, Long customerId) {
-        // গ্রাহকের অ্যাকাউন্ট খোঁজা
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
+    // **Reopen Account using Account Number**
+    public String reopenAccount(String accountNumber, Long customerId) {
+        Optional<Account> accountOpt = accountRepository.findByAccountNumber(accountNumber);
 
         if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
 
-            // চেক করুন গ্রাহক এই অ্যাকাউন্টের মালিক কিনা
+
             if (!account.getCustomer().getId().equals(customerId)) {
                 return "Unauthorized access! This account does not belong to the provided customer.";
             }
 
-            // চেক করুন অ্যাকাউন্টটি বন্ধ রয়েছে কিনা
-            if (!"closed".equals(account.getStatus())) {
+
+            if (!"closed".equalsIgnoreCase(account.getStatus())) {
                 return "Account is already active.";
             }
 
-            // চেক করুন কোনও পেন্ডিং ট্রানজেকশন আছে কিনা
+
             long pendingTransactions = transactionRepository.countByAccountAndStatus(account, "pending");
             if (pendingTransactions > 0) {
                 return "Account cannot be reopened while there are pending transactions.";
             }
 
-            // অ্যাকাউন্ট পুনরায় চালু করা হচ্ছে
+
             account.setStatus("active");
-            account.setCloseAt(null);
+            account.setCloseAt(null);  // Close date reset
             accountRepository.save(account);
 
             return "Account reopened successfully.";
         }
         return "Account not found!";
     }
-
 
 }

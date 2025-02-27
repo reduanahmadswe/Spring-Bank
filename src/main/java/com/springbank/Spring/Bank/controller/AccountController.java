@@ -12,36 +12,28 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @PostMapping("/close/{accountId}")
-    public ResponseEntity<String> closeAccount(@PathVariable Long accountId, @RequestBody CloseAccountRequest request) {
+    // **Account Close using Account Number**
+    @PostMapping("/close/{accountNumber}")
+    public ResponseEntity<String> closeAccount(
+            @PathVariable String accountNumber,
+            @RequestBody CloseAccountRequest request) {
+
         Long customerId = request.getCustomerId();
-        String response = accountService.closeAccount(accountId, customerId);
+        String response = accountService.closeAccount(accountNumber, customerId);
         return ResponseEntity.ok(response);
     }
 
-    public static class CloseAccountRequest {
-        private Long customerId;
-
-        public Long getCustomerId() {
-            return customerId;
-        }
-
-        public void setCustomerId(Long customerId) {
-            this.customerId = customerId;
-        }
-    }
-
-    @PostMapping("/reopen/{accountId}")
+    // **Account Reopen using Account Number**
+    @PostMapping("/reopen/{accountNumber}")
     public ResponseEntity<String> reopenAccount(
-            @PathVariable Long accountId,
+            @PathVariable String accountNumber,
             @RequestBody ReopenAccountRequest request) {
 
         Long customerId = request.getCustomerId();
-        String response = accountService.reopenAccount(accountId, customerId);
+        String response = accountService.reopenAccount(accountNumber, customerId);
         return ResponseEntity.ok(response);
     }
 
-    // গ্রাহকের অনুরোধ গ্রহণের জন্য একটি ক্লাস
     public static class ReopenAccountRequest {
         private Long customerId;
 
@@ -55,11 +47,16 @@ public class AccountController {
     }
 
 
-    public AccountService getAccountService() {
-        return accountService;
-    }
+    // Request DTO for Closing Account
+    public static class CloseAccountRequest {
+        private Long customerId;
 
-    public void setAccountService(AccountService accountService) {
-        this.accountService = accountService;
+        public Long getCustomerId() {
+            return customerId;
+        }
+
+        public void setCustomerId(Long customerId) {
+            this.customerId = customerId;
+        }
     }
 }
