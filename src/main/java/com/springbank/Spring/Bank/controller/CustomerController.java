@@ -8,10 +8,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customer")
+@CrossOrigin(origins = "*")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -24,28 +27,37 @@ public class CustomerController {
 
     // Login endpoint
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
         try {
             Optional<Customer> customerOptional = customerService.getCustomerByEmail(loginRequest.getEmail());
 
             if (customerOptional.isEmpty()) {
-                return ResponseEntity.status(401).body("Invalid email or password!");
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid email or password!"));
             }
 
             Customer customer = customerOptional.get();
             boolean passwordValid = customerService.validatePassword(loginRequest.getPassword(), customer.getPassword());
 
             if (!passwordValid) {
-                return ResponseEntity.status(401).body("Invalid email or password!");
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid email or password!"));
             }
 
-            // If authentication is successful, you can generate a JWT token or return a success message
-            return ResponseEntity.ok("Login successful!");
+            String jwtToken = customerService.generateJwtToken(customer);
+
+            // JWT token response-এ পাঠানো হচ্ছে JSON format-এ
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Login successful!");
+            response.put("token", jwtToken);
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred during login!");
+            e.printStackTrace();  // Error trace print করবেন, যাতে ডিবাগিং সহজ হয়
+            return ResponseEntity.status(500).body(Map.of("error", "An error occurred during login!"));
         }
     }
+
+
 
 
     // Create a Customer Account
@@ -61,12 +73,14 @@ public class CustomerController {
     }
 
     // Check Balance
-    @GetMapping("/balance/{id}")
-    public ResponseEntity<?> checkBalance(@PathVariable Long id) {
-        Optional<Customer> customer = customerService.getCustomerById(id);
+    @GetMapping("/balance/{accountNumber}")
+    public ResponseEntity<?> checkBalance(@PathVariable String accountNumber) {
+        Optional<Customer> customer = customerService.getCustomerByAccountNumber(accountNumber);
+
         if (customer.isPresent()) {
             return ResponseEntity.ok("{\"balance\": " + customer.get().getBalance() + "}");
         }
         return ResponseEntity.status(404).body("Customer Not Found!");
     }
+
 }
