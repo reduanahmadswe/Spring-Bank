@@ -105,4 +105,15 @@ public class TransactionService {
     public List<Transaction> getTransactionHistory(String accountNumber) {
         return transactionRepository.findByAccount_AccountNumber(accountNumber);
     }
+
+    public double getBalance(String accountNumber) {
+        Optional<Account> accountOptional = accountRepository.findByAccountNumber(accountNumber);
+        if (accountOptional.isPresent()) {
+            return accountOptional.get().getBalance(); // Accessing the balance from the Account object
+        } else {
+            throw new RuntimeException("Account not found");
+        }
+    }
+
+
 }

@@ -1,8 +1,10 @@
 package com.springbank.Spring.Bank.service;
 
 import com.springbank.Spring.Bank.model.Account;
+import com.springbank.Spring.Bank.model.Customer;
 import com.springbank.Spring.Bank.model.Transaction;
 import com.springbank.Spring.Bank.repository.AccountRepository;
+import com.springbank.Spring.Bank.repository.CustomerRepository;
 import com.springbank.Spring.Bank.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,9 @@ public class AccountService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     // **Generate Unique Account Number**
     public String createUniqueAccountNumber() {
@@ -102,6 +107,27 @@ public class AccountService {
             return "Account reopened successfully.";
         }
         return "Account not found!";
+    }
+
+
+    public void updateBalance(Long accountId, double amount) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        double currentBalance = account.getBalance();
+        double newBalance = currentBalance + amount;
+        account.setBalance(newBalance);
+
+        // Update customer's balance if needed
+        Customer customer = account.getCustomer();
+        if (customer != null) {
+            double customerBalance = customer.getBalance();
+            double newCustomerBalance = customerBalance + amount;
+            customer.setBalance(newCustomerBalance);
+            customerRepository.save(customer);
+        }
+
+        accountRepository.save(account);
     }
 
 }
