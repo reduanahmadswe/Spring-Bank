@@ -1,6 +1,8 @@
 package com.springbank.Spring.Bank.controller;
 
+import com.springbank.Spring.Bank.model.Account;
 import com.springbank.Spring.Bank.model.Customer;
+import com.springbank.Spring.Bank.service.AccountService;
 import com.springbank.Spring.Bank.service.CustomerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,10 +21,12 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final AuthenticationManager authenticationManager;
+    private final AccountService accountService;
 
-    public CustomerController(CustomerService customerService, AuthenticationManager authenticationManager) {
+    public CustomerController(CustomerService customerService, AuthenticationManager authenticationManager, AccountService accountService) {
         this.customerService = customerService;
         this.authenticationManager = authenticationManager;
+        this.accountService = accountService;
     }
 
     // Login endpoint
@@ -73,14 +77,27 @@ public class CustomerController {
     }
 
     // Check Balance
-    @GetMapping("/balance/{accountNumber}")
-    public ResponseEntity<?> checkBalance(@PathVariable String accountNumber) {
+//    @GetMapping("/balance/{accountNumber}")
+//    public ResponseEntity<?> checkBalance(@PathVariable String accountNumber) {
+//        Optional<Customer> customer = customerService.getCustomerByAccountNumber(accountNumber);
+//
+//        if (customer.isPresent()) {
+//            return ResponseEntity.ok("{\"balance\": " + customer.get().getBalance() + "}");
+//        }
+//        return ResponseEntity.status(404).body("Customer Not Found!");
+//    }
+
+    @GetMapping("/balance")
+    public ResponseEntity<?> checkBalance(@RequestParam String accountNumber) {
         Optional<Customer> customer = customerService.getCustomerByAccountNumber(accountNumber);
 
         if (customer.isPresent()) {
             return ResponseEntity.ok("{\"balance\": " + customer.get().getBalance() + "}");
         }
+
+
         return ResponseEntity.status(404).body("Customer Not Found!");
     }
+
 
 }

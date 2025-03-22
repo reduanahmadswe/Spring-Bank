@@ -21,7 +21,7 @@ public class SecurityConfig {
                                 "/api/admin/login",
                                 "/api/customer/create",
                                 "/api/customer/login",
-                                "api/customer/balance/**",
+                                "/api/customer/balance",
                                 "/api/transaction/deposit",
                                 "/api/transaction/withdraw",
                                 "/api/transaction/transfer",
@@ -29,11 +29,11 @@ public class SecurityConfig {
                                 "/accounts/close/**",
                                 "/accounts/reopen/**")
                         .permitAll() // Public routes
-                        .requestMatchers(
-                                "/api/customer/balance/**",
-                                "/api/transaction/transfer",
-                                "/api/transaction/history/**")
-                        .authenticated() // Authenticated routes
+//                        .requestMatchers(
+//                                "/api/customer/balance/**",
+//                                "/api/transaction/transfer",
+//                                "/api/transaction/history/**")
+//                        .authenticated() // Authenticated routes
                         .anyRequest().authenticated() // All other requests need authentication
                 );
 
