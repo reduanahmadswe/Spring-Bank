@@ -22,6 +22,8 @@ public class SecurityConfig {
                                 "/api/customer/create",
                                 "/api/customer/login",
                                 "/api/customer/balance",
+                                "/accounts/balance",
+                                "/accounts/customerdata",
                                 "/api/transaction/deposit",
                                 "/api/transaction/withdraw",
                                 "/api/transaction/transfer",

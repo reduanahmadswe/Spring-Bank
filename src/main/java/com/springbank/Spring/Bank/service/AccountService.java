@@ -131,4 +131,11 @@ public class AccountService {
     }
 
 
+    public Optional<Account> getAccountByAccountNumber(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber);
+    }
+
+
+
+
 }

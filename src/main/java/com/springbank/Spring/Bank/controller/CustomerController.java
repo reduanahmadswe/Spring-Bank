@@ -87,6 +87,7 @@ public class CustomerController {
 //        return ResponseEntity.status(404).body("Customer Not Found!");
 //    }
 
+
     @GetMapping("/balance")
     public ResponseEntity<?> checkBalance(@RequestParam String accountNumber) {
         Optional<Customer> customer = customerService.getCustomerByAccountNumber(accountNumber);
@@ -98,6 +99,9 @@ public class CustomerController {
 
         return ResponseEntity.status(404).body("Customer Not Found!");
     }
+
+
+
 
 
 }
