@@ -95,42 +95,24 @@ public class AccountController {
         }
     }
 
-
-    // Request DTO for Closing Account
-    public static class CloseAccountRequest {
-        private Long customerId;
-
-        public Long getCustomerId() {
-            return customerId;
-        }
-
-        public void setCustomerId(Long customerId) {
-            this.customerId = customerId;
-        }
-    }
-
     // **Account Reopen using Account Number**
     @PostMapping("/reopen/{accountNumber}")
-    public ResponseEntity<String> reopenAccount(
-            @PathVariable String accountNumber,
-            @RequestBody ReopenAccountRequest request) {
+    public ResponseEntity<Map<String, Object>> reopenAccount(@PathVariable String accountNumber) {
+        Map<String, Object> response = new HashMap<>();
 
-        Long customerId = request.getCustomerId();
-        String response = accountService.reopenAccount(accountNumber, customerId);
-        return ResponseEntity.ok(response);
-    }
+        String result = accountService.reopenAccount(accountNumber);
 
-    public static class ReopenAccountRequest {
-        private Long customerId;
-
-        public Long getCustomerId() {
-            return customerId;
+        if (result.equals("Account reopened successfully.")) {
+            response.put("status", "success");
+            response.put("message", result);
+            return ResponseEntity.ok(response);
         }
 
-        public void setCustomerId(Long customerId) {
-            this.customerId = customerId;
-        }
+        response.put("status", "error");
+        response.put("message", result);
+        return ResponseEntity.badRequest().body(response);
     }
+
 
 
 }

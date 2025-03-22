@@ -7,6 +7,7 @@ import com.springbank.Spring.Bank.model.Transaction;
 import com.springbank.Spring.Bank.repository.AccountRepository;
 import com.springbank.Spring.Bank.repository.CustomerRepository;
 import com.springbank.Spring.Bank.repository.TransactionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -66,37 +67,30 @@ public class AccountService {
     }
 
     // **Reopen Account using Account Number**
-    public String reopenAccount(String accountNumber, Long customerId) {
+    @Transactional
+    public String reopenAccount(String accountNumber) {
         Optional<Account> accountOpt = accountRepository.findByAccountNumber(accountNumber);
 
-        if (accountOpt.isPresent()) {
-            Account account = accountOpt.get();
-
-
-            if (!account.getCustomer().getId().equals(customerId)) {
-                return "Unauthorized access! This account does not belong to the provided customer.";
-            }
-
-
-            if (!"closed".equalsIgnoreCase(account.getStatus())) {
-                return "Account is already active.";
-            }
-
-
-            long pendingTransactions = transactionRepository.countByAccountAndStatus(account, "pending");
-            if (pendingTransactions > 0) {
-                return "Account cannot be reopened while there are pending transactions.";
-            }
-
-
-            account.setStatus("active");
-            account.setCloseAt(null);  // Close date reset
-            accountRepository.save(account);
-
-            return "Account reopened successfully.";
+        if (accountOpt.isEmpty()) {
+            return "Account not found!";
         }
-        return "Account not found!";
+
+        Account account = accountOpt.get();
+
+        // account jodi age teke active take ta hole message dibe
+        if ("active".equalsIgnoreCase(account.getStatus())) {
+            return "Account is already active.";
+        }
+
+        // account ke active kora ache
+        account.setStatus("active");
+        account.setCloseAt(null); // bondho howar time null kora hosse
+        accountRepository.save(account);
+
+        return "Account reopened successfully.";
     }
+
+
 
 
     public void updateBalance(Long accountId, double amount) {

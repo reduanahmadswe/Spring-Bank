@@ -29,7 +29,7 @@ public class SecurityConfig {
                                 "/api/transaction/transfer",
                                 "/api/transaction/history/**",
                                 "/api/accounts/close/**",
-                                "/accounts/reopen/**")
+                                "/api/accounts/reopen/**")
                         .permitAll() // Public routes
 //                        .requestMatchers(
 //                                "/api/customer/balance/**",
