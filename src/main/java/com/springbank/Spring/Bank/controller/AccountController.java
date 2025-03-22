@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     @Autowired
@@ -83,16 +83,30 @@ public class AccountController {
         return ResponseEntity.status(404).body(response);
     }
 
-
     // **Account Close using Account Number**
-    @PostMapping("/close/{accountNumber}")
-    public ResponseEntity<String> closeAccount(
-            @PathVariable String accountNumber,
-            @RequestBody CloseAccountRequest request) {
+    @PutMapping("/close/{accountNumber}")
+    public ResponseEntity<String> closeAccount(@PathVariable String accountNumber) {
+        boolean isClosed = accountService.closeAccount(accountNumber);
 
-        Long customerId = request.getCustomerId();
-        String response = accountService.closeAccount(accountNumber, customerId);
-        return ResponseEntity.ok(response);
+        if (isClosed) {
+            return ResponseEntity.ok("Account closed successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Account not found or already closed.");
+        }
+    }
+
+
+    // Request DTO for Closing Account
+    public static class CloseAccountRequest {
+        private Long customerId;
+
+        public Long getCustomerId() {
+            return customerId;
+        }
+
+        public void setCustomerId(Long customerId) {
+            this.customerId = customerId;
+        }
     }
 
     // **Account Reopen using Account Number**
@@ -117,21 +131,6 @@ public class AccountController {
             this.customerId = customerId;
         }
     }
-
-
-    // Request DTO for Closing Account
-    public static class CloseAccountRequest {
-        private Long customerId;
-
-        public Long getCustomerId() {
-            return customerId;
-        }
-
-        public void setCustomerId(Long customerId) {
-            this.customerId = customerId;
-        }
-    }
-
 
 
 }

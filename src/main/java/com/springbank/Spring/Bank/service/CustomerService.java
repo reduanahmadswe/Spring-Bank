@@ -95,8 +95,8 @@ public class CustomerService {
     }
 
     public Optional<Customer> getCustomerByAccountNumber(String accountNumber) {
-        return accountRepository.findByAccountNumber(accountNumber)
-                .map(Account::getCustomer);
+        Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
+        return account.map(Account::getCustomer);  // Account থেকে Customer তথ্য বের করা
     }
 
 }

@@ -1,5 +1,6 @@
 package com.springbank.Spring.Bank.service;
 
+import com.springbank.Spring.Bank.controller.AccountController;
 import com.springbank.Spring.Bank.model.Account;
 import com.springbank.Spring.Bank.model.Customer;
 import com.springbank.Spring.Bank.model.Transaction;
@@ -7,7 +8,12 @@ import com.springbank.Spring.Bank.repository.AccountRepository;
 import com.springbank.Spring.Bank.repository.CustomerRepository;
 import com.springbank.Spring.Bank.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
@@ -40,40 +46,23 @@ public class AccountService {
     }
 
     // **Close Account using Account Number**
-    public String closeAccount(String accountNumber, Long customerId) {
-        Account account = accountRepository.findByAccountNumber(accountNumber)
-                .filter(acc -> acc.getCustomer().getId().equals(customerId))
-                .orElse(null);
+    // Account close using account number
+    public boolean closeAccount(String accountNumber) {
+        // Account খোঁজা হচ্ছে account number দিয়ে
+        Optional<Account> accountOptional = accountRepository.findByAccountNumber(accountNumber);
 
-        if (account == null) {
-            return "Account not found or unauthorized access.";
+        if (accountOptional.isPresent()) {
+            Account account = accountOptional.get();
+
+            // অ্যাকাউন্টটি 'active' হলে সেটির স্ট্যাটাস 'Closed' করা হচ্ছে
+            if ("active".equals(account.getStatus())) {
+                account.setStatus("Closed");
+                account.setCloseAt(LocalDateTime.now());  // Close time সেট করা হচ্ছে
+                accountRepository.save(account);  // পরিবর্তন সেভ করা হচ্ছে
+                return true;
+            }
         }
-
-        if ("closed".equalsIgnoreCase(account.getStatus())) {
-            return "This account is already closed.";
-        }
-
-        if (account.getBalance() > 0) {
-            return "Account balance must be zero to close the account.";
-        }
-
-        long pendingTransactions = transactionRepository.countByAccountAndStatus(account, "pending");
-        if (pendingTransactions > 0) {
-            return "Please complete all pending transactions before closing the account.";
-        }
-
-        account.setStatus("closed");
-        account.setCloseAt(LocalDateTime.now());
-        accountRepository.save(account);
-
-        Transaction transaction = new Transaction();
-        transaction.setAccount(account);
-        transaction.setAmount(0.0);
-        transaction.setType("Account Closure");
-        transaction.setTimestamp(LocalDateTime.now());
-        transactionRepository.save(transaction);
-
-        return "Account closed successfully. No further transactions allowed.";
+        return false;
     }
 
     // **Reopen Account using Account Number**

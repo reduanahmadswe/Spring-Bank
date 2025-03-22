@@ -28,7 +28,7 @@ public class SecurityConfig {
                                 "/api/transaction/withdraw",
                                 "/api/transaction/transfer",
                                 "/api/transaction/history/**",
-                                "/accounts/close/**",
+                                "/api/accounts/close/**",
                                 "/accounts/reopen/**")
                         .permitAll() // Public routes
 //                        .requestMatchers(
