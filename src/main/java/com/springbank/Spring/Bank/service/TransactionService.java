@@ -26,18 +26,22 @@ public class TransactionService {
         if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
 
-            if ("closed".equals(account.getStatus())) {
-                return "Transaction failed. This account is closed.";
+            // Check if the account is closed
+            if ("closed".equalsIgnoreCase(account.getStatus())) {
+                return "Transaction failed. This account is closed. Transactions are not allowed.";
             }
 
+            // Proceed with deposit if the account is active
             account.setBalance(account.getBalance() + amount);
             accountRepository.save(account);
 
+            // Record the transaction
             Transaction transaction = new Transaction("Deposit", amount, account);
             transactionRepository.save(transaction);
 
             return "Deposit successful. New balance: " + account.getBalance();
         }
+
         return "Account not found!";
     }
 
@@ -48,10 +52,12 @@ public class TransactionService {
         if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
 
-            if ("closed".equals(account.getStatus())) {
+            // Check if the account is closed
+            if ("closed".equalsIgnoreCase(account.getStatus())) {
                 return "Transaction failed. This account is closed.";
             }
 
+            // Check if there are sufficient funds
             if (account.getBalance() >= amount) {
                 account.setBalance(account.getBalance() - amount);
                 accountRepository.save(account);
@@ -76,10 +82,12 @@ public class TransactionService {
             Account fromAccount = fromAccountOpt.get();
             Account toAccount = toAccountOpt.get();
 
-            if ("closed".equals(fromAccount.getStatus()) || "closed".equals(toAccount.getStatus())) {
+            // Check if either account is closed
+            if ("closed".equalsIgnoreCase(fromAccount.getStatus()) || "closed".equalsIgnoreCase(toAccount.getStatus())) {
                 return "Transaction failed. One or both accounts are closed.";
             }
 
+            // Check if the sender has enough balance
             if (fromAccount.getBalance() >= amount) {
                 fromAccount.setBalance(fromAccount.getBalance() - amount);
                 toAccount.setBalance(toAccount.getBalance() + amount);
@@ -101,11 +109,14 @@ public class TransactionService {
         return "One or both accounts not found!";
     }
 
-    // Get Transaction History using Account Number**
+
+
+    // Transaction History deker jonno
     public List<Transaction> getTransactionHistory(String accountNumber) {
         return transactionRepository.findByAccount_AccountNumber(accountNumber);
     }
 
+    // balance get korar jonno
     public double getBalance(String accountNumber) {
         Optional<Account> accountOptional = accountRepository.findByAccountNumber(accountNumber);
         if (accountOptional.isPresent()) {
@@ -114,6 +125,4 @@ public class TransactionService {
             throw new RuntimeException("Account not found");
         }
     }
-
-
 }
